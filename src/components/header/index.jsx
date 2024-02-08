@@ -1,13 +1,59 @@
-import React, { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import logo from "../../../public/logo-3.svg";
-
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../../firebase/config";
+import {
+  REMOVE_ACTIVE_USER,
+  SET_ACTIVE_USER,
+} from "../../redux/slices/authSlice";
+import { useDispatch } from "react-redux";
+import { ShowInLogin, ShowInLogout } from "../hiddenLinks";
+import { AdminOnlyLink } from "../adminOnlyRoute/index.jsx";
 const Header = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showSearch, setShowSearch] = useState(false);
+  const [displayName, setDisplayName] = useState("");
+  const [loading, setLoading] = useState(true);
   const toggleSearchShow = () => {
     setShowSearch((showSearch) => !showSearch);
   };
   const activeClassName = `text-blue-500`;
+  const logOut = () => {
+    signOut(auth)
+      .then(() => {
+        navigate("/");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      setLoading(false);
+      if (user) {
+
+        if (user.displayName === null) {
+          const u1 = user.email.slice(0, user.email.indexOf("@"));
+          setDisplayName(u1);
+        } else {
+          setDisplayName(user?.displayName);
+        }
+        dispatch(
+          SET_ACTIVE_USER({
+            email: user.email,
+            userName: user?.displayName ? user?.displayName : displayName,
+            uid: user.uid,
+          })
+        );
+      } else {
+        setDisplayName("");
+        dispatch(REMOVE_ACTIVE_USER());
+       
+      }
+    });
+  }, [displayName,dispatch]);
   return (
     <header className="bg-white text-black">
       <div className="flex items-center justify-between p-3 max-w-[80%] m-auto">
@@ -40,34 +86,77 @@ const Header = () => {
                 Contact
               </NavLink>
             </li>
-            <li>
-              <NavLink className={({ isActive }) => isActive?activeClassName:"text-black font-medium  hover:text-blue-500"}
-              to="/login">Login</NavLink>
-            </li>
-            <li>
-              <NavLink
-                className={({ isActive }) =>
-                  isActive
-                    ? activeClassName
-                    : "text-black font-medium  hover:text-blue-500"
-                }
-                to="/register"
+            <ShowInLogout>
+              <li>
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive
+                      ? activeClassName
+                      : "text-black font-medium  hover:text-blue-500"
+                  }
+                  to="/login"
+                >
+                  Login
+                </NavLink>
+              </li>
+            </ShowInLogout>
+            <ShowInLogin>
+              <li
+                className="cursor-pointer hover:text-blue-500"
+                onClick={logOut}
               >
-                Register
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                className={({ isActive }) =>
-                  isActive
-                    ? activeClassName
-                    : "text-black font-medium  hover:text-blue-500"
-                }
-                to="/orders"
-              >
-                My orders
-              </NavLink>
-            </li>
+                Logout
+              </li>
+            </ShowInLogin>
+
+            <ShowInLogin>
+              <li className="cursor-pointer hover:text-blue-500">
+                Hi {displayName}
+              </li>
+            </ShowInLogin>
+
+            <ShowInLogout>
+              <li>
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive
+                      ? activeClassName
+                      : "text-black font-medium  hover:text-blue-500"
+                  }
+                  to="/register"
+                >
+                  Register
+                </NavLink>
+              </li>
+            </ShowInLogout>
+            <ShowInLogin>
+              <li>
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive
+                      ? activeClassName
+                      : "text-black font-medium  hover:text-blue-500"
+                  }
+                  to="/orders"
+                >
+                  My orders
+                </NavLink>
+              </li>
+            </ShowInLogin>
+            <AdminOnlyLink>
+              <li>
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive
+                      ? activeClassName
+                      : "text-black font-medium  hover:text-blue-500"
+                  }
+                  to="/admin"
+                >
+                  Admin
+                </NavLink>
+              </li>
+            </AdminOnlyLink>
           </ul>
         </nav>
         <div className="flex items-center gap-3">

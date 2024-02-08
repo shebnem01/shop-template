@@ -16,7 +16,11 @@ const Register = () => {
       },
       validationSchema: Yup.object({
         email: Yup.string().email("Invalid email address").required("Required"),
-        password: Yup.string().required('Password is required'),
+        password: Yup.string().required('Password is required').min(8, "Password must be at least 8 characters")
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+          "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"
+        ),
         cPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'Passwords must match')
       }),
@@ -71,7 +75,6 @@ const Register = () => {
                   focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700
                    dark:border-gray-600 dark:placeholder-gray-400 dark:text-white
                     dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="name@company.com"
                   required=""
                 />
                 {touched.email && errors.email ? (

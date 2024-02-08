@@ -6,6 +6,8 @@ import Login from "./pages/auth/login";
 import Register from "./pages/auth/register";
 import Reset from "./pages/auth/reset";
 import Orders from "./pages/orders";
+import Admin from "./pages/admin";
+import { AdminOnlyRoute } from "./components/adminOnlyRoute";
 function App() {
   return (
     <Router>
@@ -17,6 +19,15 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/reset" element={<Reset />} />
         <Route path="/orders" element={<Orders />} />
+
+        <Route
+          path="/admin/*"
+          element={
+            <AdminOnlyRoute>
+              <Admin />
+            </AdminOnlyRoute>
+          }
+        />
       </Routes>
     </Router>
   );

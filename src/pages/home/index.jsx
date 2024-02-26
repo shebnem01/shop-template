@@ -1,12 +1,9 @@
-import React from 'react'
-import Header from '../../components/header'
-
+import React from "react";
+import Product from "../../shared/components/product";
 const Home = () => {
-  return (
-    <div >
-home
-    </div>
-  )
-}
+  return <div className="container">
+    <Product/>
+  </div>;
+};
 
-export default Home
+export default Home;
